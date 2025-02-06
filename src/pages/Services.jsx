@@ -1,5 +1,11 @@
+import UploadImages from "../components/UploadImages";
+
 const Services = () => {
-  return <div>Services</div>;
+  return (
+    <>
+      <UploadImages />
+    </>
+  );
 };
 
 export default Services;

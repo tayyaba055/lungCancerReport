@@ -1,16 +1,30 @@
 // src/contexts/AuthContext.js
-import { createContext, useState, useContext } from "react";
-import PropTypes from "prop-types";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
-
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // User state (null if not logged in)
+  const [user, setUser] = useState(null);
 
-  const login = (userData) => setUser(userData);
-  const logout = () => setUser(null);
+  // Load user from localStorage on initial render
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // Login function
+  const login = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
@@ -19,6 +33,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
+export const useAuth = () => useContext(AuthContext);

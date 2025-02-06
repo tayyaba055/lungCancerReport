@@ -7,9 +7,9 @@ import { ThemeContext } from "../contexts/ThemeContext";
 const MainLayout = ({ children }) => {
   const { theme, setTheme } = useContext(ThemeContext);
   return (
-    <div className="main-layout w-full">
+    <div className="flex flex-col min-h-screen">
       <Header theme={theme} setTheme={setTheme} />
-      <main>{children}</main>
+      <main className="flex-grow">{children}</main>
       <Footer />
     </div>
   );

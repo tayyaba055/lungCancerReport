@@ -1,3 +1,4 @@
+// src/App.js
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import MainLayout from "./layouts/MainLayout";
@@ -9,6 +10,9 @@ import Services from "./pages/Services";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ImageSuccessfullModal from "./components/ImageSuccessfullModal";
+import ClientDetailsForm from "./components/ClientDetailsForm";
+import FinalReportForm from "./components/BrainTumorReport";
 
 const App = () => {
   return (
@@ -27,6 +31,30 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Services />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/imagesuccessfullmodal"
+              element={
+                <ProtectedRoute>
+                  <ImageSuccessfullModal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/clientdetailsform"
+              element={
+                <ProtectedRoute>
+                  <ClientDetailsForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finalreportform"
+              element={
+                <ProtectedRoute>
+                  <FinalReportForm />
                 </ProtectedRoute>
               }
             />

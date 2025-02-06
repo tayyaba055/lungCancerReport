@@ -1,92 +1,115 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-hot-toast";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [userName, setUserName] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${import.meta.env.VITE_BASEURL}/users/register`, {
-        email,
-        password,
-        userName,
-      });
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+      password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password")], "Passwords must match")
+        .required("Confirm Password is required"),
+    }),
+    onSubmit: async (values) => {
+      setLoading(true);
+      try {
+        await axios.post(`${import.meta.env.VITE_BASEURL}/users/register`, {
+          email: values.email,
+          password: values.password,
+        });
 
-      // Reset all fields
-      setEmail("");
-      setPassword("");
-      setUserName("");
-
-      setSuccess("Registration successful. Redirecting to login...");
-      setError("");
-
-      // Navigate to login page after a short delay
-      setTimeout(() => navigate("/login"), 1500);
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
-      setSuccess("");
-    }
-  };
+        toast.success("Registration successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 1500);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Registration failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex items-center justify-center h-screen">
       <form
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full sm:w-[80%] md:w-[50%] lg:w-[30%]"
-        onSubmit={handleRegister}
+        onSubmit={formik.handleSubmit}
       >
-        <h2 className="text-2xl mb-4">Register</h2>
-        {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">{success}</p>}
+        <h2 className="mb-4 text-2xl">Register</h2>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Username
-          </label>
-          <input
-            type="text"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label className="block mb-2 text-sm font-bold text-gray-700">
             Email
           </label>
           <input
             type="email"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            name="email"
+            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+            {...formik.getFieldProps("email")}
           />
+          {formik.touched.email && formik.errors.email && (
+            <p className="mt-1 text-xs text-red-500">{formik.errors.email}</p>
+          )}
         </div>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label className="block mb-2 text-sm font-bold text-gray-700">
             Password
           </label>
           <input
             type="password"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            name="password"
+            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+            {...formik.getFieldProps("password")}
           />
+          {formik.touched.password && formik.errors.password && (
+            <p className="mt-1 text-xs text-red-500">
+              {formik.errors.password}
+            </p>
+          )}
         </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-bold text-gray-700">
+            Confirm Password
+          </label>
+          <input
+            type="password"
+            name="confirmPassword"
+            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+            {...formik.getFieldProps("confirmPassword")}
+          />
+          {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+            <p className="mt-1 text-xs text-red-500">
+              {formik.errors.confirmPassword}
+            </p>
+          )}
+        </div>
+
         <button
           type="submit"
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="w-full px-4 py-2 font-bold text-white bg-green-500 rounded hover:bg-green-700 focus:outline-none focus:shadow-outline"
+          disabled={loading}
         >
-          Register
+          {loading ? "Registering..." : "Register"}
         </button>
-        <p className="text-sm text-gray-600 mt-4 text-center">
+
+        <p className="mt-4 text-sm text-center text-gray-600">
           Already have an account?{" "}
           <Link to="/login" className="text-blue-500 hover:underline">
             Login here
